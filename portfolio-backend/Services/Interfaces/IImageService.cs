@@ -1,8 +1,6 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using backend.Models;
+using portfolio_backend.Models.Entities;
 
-namespace backend.Services
+namespace portfolio_backend.Services.Interfaces
 {
     public interface IImageService
     {

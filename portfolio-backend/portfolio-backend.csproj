@@ -12,6 +12,8 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.9" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.9" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.9" />
   </ItemGroup>
 
   <ItemGroup>
@@ -20,10 +22,20 @@
     <None Remove="Microsoft.EntityFrameworkCore" />
     <None Remove="Services\Interfaces\" />
     <None Remove="Microsoft.EntityFrameworkCore.SqlServer" />
+    <None Remove="Data\Repository\" />
+    <None Remove="Data\Entities\" />
+    <None Remove="Data\DTOs\" />
+    <None Remove="AutoMapper" />
+    <None Remove="Microsoft.Extensions.DependencyInjection" />
+    <None Remove="AutoMapper.Extensions.Microsoft.DependencyInjection" />
+    <None Remove="Microsoft.AspNetCore.Authentication.JwtBearer" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Controllers\" />
     <Folder Include="Helpers\" />
     <Folder Include="Services\Interfaces\" />
+    <Folder Include="Data\Repository\" />
+    <Folder Include="Data\Entities\" />
+    <Folder Include="Data\DTOs\" />
   </ItemGroup>
 </Project>

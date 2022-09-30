@@ -1,10 +1,11 @@
-﻿using backend.Models;
-using backend.Services;
+﻿using System.Text.Json.Serialization;
+using portfolio_backend.Services.Interfaces;
+using portfolio_backend.Models.Repository;
+using portfolio_backend.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using System.Text.Json.Serialization;
 
-namespace backend
+namespace portfolio_backend
 {
     public class Startup
     {
@@ -29,8 +30,9 @@ namespace backend
             {
                 optionsAction.UseSqlServer(Configuration.GetConnectionString("Database"));
             });
-            services.AddScoped<IMailService, MailService>();
-            services.AddScoped<IPostService, PostService>();
+            services.AddSingleton<IMailService, MailService>();
+            services.AddSingleton<IImageService, ImageService>();
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "backend", Version = "v1" });

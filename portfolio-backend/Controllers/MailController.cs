@@ -1,11 +1,8 @@
-﻿using System;
-using System.Threading.Tasks;
-using backend.Models;
-using backend.Services;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using portfolio_backend.Models.Entities;
+using portfolio_backend.Services.Interfaces;
 
-namespace backend.Controllers
+namespace portfolio_backend.Controllers
 {
 
     [ApiController]

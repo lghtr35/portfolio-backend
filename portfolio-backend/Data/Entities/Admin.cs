@@ -1,4 +1,4 @@
-namespace backend.Models
+namespace portfolio_backend.Models.Entities
 {
     public class Admin
     {

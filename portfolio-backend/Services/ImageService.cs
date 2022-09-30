@@ -1,12 +1,10 @@
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
-using backend.Models;
+using portfolio_backend.Models.Repository;
+using portfolio_backend.Models.Entities;
+using portfolio_backend.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace backend.Services
+namespace portfolio_backend.Services
 {
     public class ImageService : IImageService
     {
@@ -32,13 +30,13 @@ namespace backend.Services
             else
             {
                 IQueryable<Image> queryable = this._context.Images;
-                queryable = this.MakeQuery(queryable, query);
+                queryable = MakeQuery(queryable, query);
                 IEnumerable<Image> res = await queryable.ToListAsync();
                 return res;
             }
         }
 #nullable disable
-        public IQueryable<Image> MakeQuery(IQueryable<Image> queryable, Dictionary<string, string> query)
+        private static IQueryable<Image> MakeQuery(IQueryable<Image> queryable, Dictionary<string, string> query)
         {
             if (query.ContainsKey("imageid"))
             {
@@ -46,7 +44,7 @@ namespace backend.Services
             }
             if (query.ContainsKey("place"))
             {
-                queryable = queryable.Where(item => item.Place == query["place"]);
+                queryable = queryable.Where(item => item.PlacePath == query["place"]);
             }
             if (query.ContainsKey("imagename"))
             {
@@ -71,24 +69,19 @@ namespace backend.Services
         {
             img.UpdatedAt = DateTime.UtcNow;
             var res = await _context.Images.FindAsync(img.ImageId);
-            Type type = res.GetType();
             if (res == null)
             {
                 return null;
             }
-            foreach (var prop in type.GetProperties())
+            Type type = img.GetType();
+            foreach (var (prop, newValue) in from prop in type.GetProperties()
+                                             let newValue = type.GetProperty(prop.Name).GetValue(img)
+                                             where newValue != null
+                                             select (prop, newValue))
             {
-                var newValue = type.GetProperty(prop.Name).GetValue(img);
-                var oldValue = type.GetProperty(prop.Name).GetValue(res);
-                if (newValue == null)
-                    continue;
-                if (Object.Equals(oldValue, newValue))
-                    continue;
-                else
-                {
-                    type.GetProperty(prop.Name).SetValue(res, newValue);
-                }
+                type.GetProperty(prop.Name).SetValue(res, newValue);
             }
+
             await _context.SaveChangesAsync();
             return res;
         }

@@ -1,7 +1,4 @@
-using System;
-
-
-namespace backend.Models
+namespace portfolio_backend.Models.Entities
 {
     public class Mail
     {
