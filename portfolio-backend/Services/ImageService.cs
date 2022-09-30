@@ -1,6 +1,6 @@
 using System.Data;
-using portfolio_backend.Models.Repository;
-using portfolio_backend.Models.Entities;
+using portfolio_backend.Data.Repository;
+using portfolio_backend.Data.Entities;
 using portfolio_backend.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,15 +8,15 @@ namespace portfolio_backend.Services
 {
     public class ImageService : IImageService
     {
-        private readonly AppDatabaseContext _context;
-        public ImageService(AppDatabaseContext context)
+        private readonly AppDatabaseContext context;
+        public ImageService(AppDatabaseContext _context)
         {
-            _context = context;
+            this.context = _context;
         }
         public async Task<Image> CreateImage(Image img)
         {
-            _context.Images.Add(img);
-            await _context.SaveChangesAsync();
+            context.Images.Add(img);
+            await context.SaveChangesAsync();
             return img;
         }
 #nullable enable
@@ -24,12 +24,12 @@ namespace portfolio_backend.Services
         {
             if (query.Count == 0)
             {
-                IEnumerable<Image> res = await _context.Images.ToListAsync();
+                IEnumerable<Image> res = await context.Images.ToListAsync();
                 return res;
             }
             else
             {
-                IQueryable<Image> queryable = this._context.Images;
+                IQueryable<Image> queryable = this.context.Images;
                 queryable = MakeQuery(queryable, query);
                 IEnumerable<Image> res = await queryable.ToListAsync();
                 return res;
@@ -62,13 +62,13 @@ namespace portfolio_backend.Services
         }
         public async Task<Image> GetImage(int id)
         {
-            Image res = await _context.Images.Where(prop => prop.ImageId == id).FirstOrDefaultAsync();
+            Image res = await context.Images.Where(prop => prop.ImageId == id).FirstOrDefaultAsync();
             return res;
         }
         public async Task<Image> UpdateImage(Image img)
         {
             img.UpdatedAt = DateTime.UtcNow;
-            var res = await _context.Images.FindAsync(img.ImageId);
+            var res = await context.Images.FindAsync(img.ImageId);
             if (res == null)
             {
                 return null;
@@ -82,14 +82,14 @@ namespace portfolio_backend.Services
                 type.GetProperty(prop.Name).SetValue(res, newValue);
             }
 
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
             return res;
         }
         public async Task<IEnumerable<Image>> Delete(int[] id)
         {
-            var deleted = await _context.Images.Where(item => Array.IndexOf(id, item.ImageId) > -1).ToListAsync();
-            _context.Remove(deleted);
-            await _context.SaveChangesAsync();
+            var deleted = await context.Images.Where(item => Array.IndexOf(id, item.ImageId) > -1).ToListAsync();
+            context.Remove(deleted);
+            await context.SaveChangesAsync();
             return deleted;
         }
     }

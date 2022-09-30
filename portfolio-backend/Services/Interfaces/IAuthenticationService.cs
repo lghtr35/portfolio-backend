@@ -3,7 +3,7 @@ namespace portfolio_backend.Services.Interfaces
 {
     public interface IAuthenticationService
     {
-        Task<String> generateToken(String username,String password);
+        Task<string?> GenerateToken(string username,string password);
     }
 }
 

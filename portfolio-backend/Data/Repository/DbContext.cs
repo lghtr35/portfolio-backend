@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using portfolio_backend.Models.Entities;
+using portfolio_backend.Data.Entities;
 
-namespace portfolio_backend.Models.Repository
+namespace portfolio_backend.Data.Repository
 {
     public class AppDatabaseContext : DbContext
     {
@@ -27,7 +27,6 @@ namespace portfolio_backend.Models.Repository
             modelBuilder.Entity<Image>().HasKey(prop => prop.ImageId);
             modelBuilder.Entity<Image>().Property(prop => prop.CreatedAt).HasDefaultValueSql("getutcdate()");
             modelBuilder.Entity<Image>().Property(prop => prop.UpdatedAt).HasDefaultValueSql("getutcdate()");
-            modelBuilder.Entity<Image>().HasOne(prop => prop.Project).WithMany();
             // Base ORM
             base.OnModelCreating(modelBuilder);
         }

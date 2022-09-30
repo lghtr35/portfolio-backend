@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using portfolio_backend.Models.Entities;
+using portfolio_backend.Data.Entities;
 using portfolio_backend.Services.Interfaces;
 
 namespace portfolio_backend.Controllers

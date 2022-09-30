@@ -1,4 +1,4 @@
-using portfolio_backend.Models.Entities;
+using portfolio_backend.Data.Entities;
 
 namespace portfolio_backend.Services.Interfaces
 {

@@ -1,4 +1,4 @@
-namespace portfolio_backend.Models.Entities
+namespace portfolio_backend.Data.Entities
 {
     public class Image
     {
@@ -9,6 +9,5 @@ namespace portfolio_backend.Models.Entities
         public string? ImageName { get; set; }
         public DateTime? CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
-        public Project? Project { get; set; }
     }
 }

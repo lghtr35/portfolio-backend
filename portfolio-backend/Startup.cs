@@ -1,9 +1,12 @@
 ﻿using System.Text.Json.Serialization;
 using portfolio_backend.Services.Interfaces;
-using portfolio_backend.Models.Repository;
+using portfolio_backend.Data.Repository;
 using portfolio_backend.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace portfolio_backend
 {
@@ -31,11 +34,26 @@ namespace portfolio_backend
                 optionsAction.UseSqlServer(Configuration.GetConnectionString("Database"));
             });
             services.AddSingleton<IMailService, MailService>();
-            services.AddSingleton<IImageService, ImageService>();
+            services.AddScoped<IImageService, ImageService>();
+            services.AddScoped<IAuthenticationService, AuthenticationService>();
 
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "backend", Version = "v1" });
+            });
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
+            {
+                options.RequireHttpsMetadata = false;
+                options.SaveToken = true;
+                options.TokenValidationParameters = new TokenValidationParameters()
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidAudience = Configuration["Jwt:Audience"],
+                    ValidIssuer = Configuration["Jwt:Issuer"],
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Key"]))
+                };
             });
         }
 
@@ -52,6 +70,7 @@ namespace portfolio_backend
             app.UseHttpsRedirection();
 
             app.UseRouting();
+            app.UseAuthentication();
 
             app.UseAuthorization();
 

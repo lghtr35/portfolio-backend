@@ -1,9 +1,9 @@
-namespace portfolio_backend.Data.Entities
+﻿namespace portfolio_backend.Data.DTOs
 {
-    public class Admin
+    public struct AdminDTO
     {
-        public int UserId { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
     }
 }
+

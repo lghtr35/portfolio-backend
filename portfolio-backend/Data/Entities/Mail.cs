@@ -1,4 +1,4 @@
-namespace portfolio_backend.Models.Entities
+namespace portfolio_backend.Data.Entities
 {
     public class Mail
     {

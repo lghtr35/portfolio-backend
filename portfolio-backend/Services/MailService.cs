@@ -1,6 +1,6 @@
 using System.Net;
 using System.Net.Mail;
-using portfolio_backend.Models.Entities;
+using portfolio_backend.Data.Entities;
 using portfolio_backend.Services.Interfaces;
 
 namespace portfolio_backend.Services
