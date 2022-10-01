@@ -9,11 +9,11 @@ namespace portfolio_backend.Controllers
     [Route("api/v1/[controller]")]
     public class MailController : ControllerBase
     {
-        private readonly IMailService mailService;
+        private readonly IMailService _mailService;
 
-        public MailController(IMailService mailService_)
+        public MailController(IMailService mailService)
         {
-            this.mailService = mailService_;
+            _mailService = mailService;
         }
 
         [HttpPost]
@@ -21,7 +21,7 @@ namespace portfolio_backend.Controllers
         {
             try
             {
-                return Ok(await this.mailService.SendMail(mail));
+                return Ok(await this._mailService.SendMail(mail));
             }
             catch (Exception err)
             {

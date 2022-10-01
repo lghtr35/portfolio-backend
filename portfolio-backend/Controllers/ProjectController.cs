@@ -1,27 +1,25 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using portfolio_backend.Data.Entities;
 using portfolio_backend.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 
 namespace portfolio_backend.Controllers
 {
-    [Authorize]
-    [ApiController]
-    [Route("api/v1/[controller]")]
-    public class ImageController : ControllerBase
+    public class ProjectController : ControllerBase
     {
-        private readonly IImageService _imageService;
-        public ImageController(IImageService imageService)
+        private readonly IProjectService _projectService;
+        public ProjectController(IProjectService projectService)
         {
-            _imageService = imageService;
+            _projectService = projectService;
         }
 
+        [Authorize]
         [HttpPost]
-        public async Task<ActionResult<Image>> Create([FromBody] Image img)
+        public async Task<ActionResult<Project>> Create([FromBody] Project img)
         {
             try
             {
-                return Ok(await this._imageService.CreateImage(img));
+                return Ok(await this._projectService.CreateProject(img));
             }
             catch (Exception err)
             {
@@ -30,20 +28,20 @@ namespace portfolio_backend.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<IEnumerable<Image>>> ReadOne(int id)
+        public async Task<ActionResult<IEnumerable<Project>>> ReadOne(int id)
         {
             try
             {
-                return Ok(await this._imageService.GetImage(id));
+                return Ok(await this._projectService.GetProject(id));
             }
             catch (Exception err)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, err);
             }
         }
-#nullable enable
+
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Image>>> ReadAll()
+        public async Task<ActionResult<IEnumerable<Project>>> ReadAll()
         {
             try
             {
@@ -58,20 +56,7 @@ namespace portfolio_backend.Controllers
                     }
                 }
 
-                return Ok(await this._imageService.GetImages(query));
-            }
-            catch (Exception err)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, err);
-            }
-        }
-#nullable disable
-        [HttpPut]
-        public async Task<ActionResult<Image>> Update([FromBody] Image img)
-        {
-            try
-            {
-                return Ok(await this._imageService.UpdateImage(img));
+                return Ok(await this._projectService.GetProjects(query));
             }
             catch (Exception err)
             {
@@ -79,12 +64,27 @@ namespace portfolio_backend.Controllers
             }
         }
 
-        [HttpDelete]
-        public async Task<ActionResult<Image>> Delete([FromQuery] int[] id)
+        [Authorize]
+        [HttpPut]
+        public async Task<ActionResult<Project>> Update([FromBody] Project img)
         {
             try
             {
-                return Ok(await this._imageService.Delete(id));
+                return Ok(await this._projectService.UpdateProject(img));
+            }
+            catch (Exception err)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, err);
+            }
+        }
+
+        [Authorize]
+        [HttpDelete]
+        public async Task<ActionResult<Project>> Delete([FromQuery] int[] id)
+        {
+            try
+            {
+                return Ok(await this._projectService.DeleteProject(id));
             }
             catch (Exception err)
             {
@@ -93,3 +93,4 @@ namespace portfolio_backend.Controllers
         }
     }
 }
+

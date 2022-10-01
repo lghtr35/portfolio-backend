@@ -13,13 +13,14 @@ namespace portfolio_backend.Services
         {
             this.context = _context;
         }
+
         public async Task<Image> CreateImage(Image img)
         {
             context.Images.Add(img);
             await context.SaveChangesAsync();
             return img;
         }
-#nullable enable
+
         public async Task<IEnumerable<Image>> GetImages(Dictionary<string, string> query)
         {
             if (query.Count == 0)
@@ -35,7 +36,7 @@ namespace portfolio_backend.Services
                 return res;
             }
         }
-#nullable disable
+
         private static IQueryable<Image> MakeQuery(IQueryable<Image> queryable, Dictionary<string, string> query)
         {
             if (query.ContainsKey("imageid"))
@@ -60,10 +61,14 @@ namespace portfolio_backend.Services
             }
             return queryable;
         }
-        public async Task<Image> GetImage(int id)
+
+        public Task<Image?> GetImage(int id)
         {
-            Image res = await context.Images.Where(prop => prop.ImageId == id).FirstOrDefaultAsync();
-            return res;
+            return Task.Run(() =>
+            {
+                Image res = context.Images.Where(prop => prop.ImageId == id).FirstOrDefault();
+                return res;
+            });
         }
         public async Task<Image> UpdateImage(Image img)
         {

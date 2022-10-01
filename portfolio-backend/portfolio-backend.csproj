@@ -34,6 +34,8 @@
     <None Remove="AutoMapper.Extensions.Microsoft.DependencyInjection" />
     <None Remove="Microsoft.AspNetCore.Authentication.JwtBearer" />
     <None Remove="EntityFramework" />
+    <None Remove="Projects\" />
+    <None Remove="Images\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Controllers\" />
@@ -42,5 +44,7 @@
     <Folder Include="Data\Repository\" />
     <Folder Include="Data\Entities\" />
     <Folder Include="Data\DTOs\" />
+    <Folder Include="Projects\" />
+    <Folder Include="Images\" />
   </ItemGroup>
 </Project>

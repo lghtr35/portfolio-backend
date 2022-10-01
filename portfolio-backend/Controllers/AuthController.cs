@@ -8,17 +8,17 @@ namespace portfolio_backend.Controllers
     [Route("api/v1/[controller]")]
     public class AuthController : ControllerBase
     {
-        private readonly IAuthenticationService authenticationService;
-        public AuthController(IAuthenticationService _authenticationService) {
-            authenticationService = _authenticationService;
+        private readonly IAuthenticationService _authenticationService;
+        public AuthController(IAuthenticationService authenticationService) {
+            _authenticationService = authenticationService;
         }
 
-        [HttpGet]
+        [HttpPost]
         public async Task<ActionResult<TokenDTO>> Authenticate([FromBody] AdminDTO admin)
         {
             try
             {
-                return Ok(await authenticationService.GenerateToken(admin.Username, admin.Password));
+                return Ok(await _authenticationService.GenerateToken(admin.Username, admin.Password));
             }
             catch (Exception err)
             {

@@ -8,6 +8,6 @@ namespace portfolio_backend.Services.Interfaces
         Task<IEnumerable<Image>> GetImages(Dictionary<string, string> query);
         Task<Image> UpdateImage(Image img);
         Task<IEnumerable<Image>> Delete(int[] id);
-        Task<Image> GetImage(int id);
+        Task<Image?> GetImage(int id);
     }
 }

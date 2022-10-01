@@ -36,6 +36,7 @@ namespace portfolio_backend
             services.AddSingleton<IMailService, MailService>();
             services.AddScoped<IImageService, ImageService>();
             services.AddScoped<IAuthenticationService, AuthenticationService>();
+            services.AddScoped<IAdminService, AdminService>();
 
             services.AddSwaggerGen(c =>
             {
