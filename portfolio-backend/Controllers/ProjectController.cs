@@ -1,7 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Net.Http.Headers;
 using portfolio_backend.Data.Entities;
+using portfolio_backend.Helpers;
 using portfolio_backend.Services.Interfaces;
-using Microsoft.AspNetCore.Authorization;
 
 namespace portfolio_backend.Controllers
 {
@@ -15,11 +18,11 @@ namespace portfolio_backend.Controllers
 
         [Authorize]
         [HttpPost]
-        public async Task<ActionResult<Project>> Create([FromBody] Project img)
+        public async Task<ActionResult<Project>> Create([FromBody] ProjectCreateDTO project)
         {
             try
             {
-                return Ok(await this._projectService.CreateProject(img));
+                return Ok(await this._projectService.CreateProject(project));
             }
             catch (Exception err)
             {
@@ -66,11 +69,11 @@ namespace portfolio_backend.Controllers
 
         [Authorize]
         [HttpPut]
-        public async Task<ActionResult<Project>> Update([FromBody] Project img)
+        public async Task<ActionResult<Project>> Update([FromBody] ProjectUpdateDTO project)
         {
             try
             {
-                return Ok(await this._projectService.UpdateProject(img));
+                return Ok(await this._projectService.UpdateProject(project));
             }
             catch (Exception err)
             {

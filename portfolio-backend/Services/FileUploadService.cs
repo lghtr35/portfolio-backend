@@ -6,23 +6,28 @@ namespace portfolio_backend.Services
     {
         public FileUploadService() { }
 
-        public Task<string> Upload(IFormFile file, string path, string[] acceptedExtensions)
+        public Task<string[]> UploadWithForm(IFormFile[] files, string path, string[] acceptedExtensions)
         {
             return Task.Run(() =>
             {
-                string[] filenameParts = file.FileName.Split(".");
-                if (!acceptedExtensions.Contains(filenameParts.Last())) return "";
-
-                var pathBuilt = Path.Combine(Directory.GetCurrentDirectory(), path);
-                if (!Directory.Exists(pathBuilt))
+                List<string> result = new();
+                foreach(var file in files)
                 {
-                    Directory.CreateDirectory(pathBuilt);
-                }
-                pathBuilt += filenameParts.First();
-                using FileStream stream = new(pathBuilt, FileMode.Create);
-                file.CopyTo(stream);
+                    string[] filenameParts = file.FileName.Split(".");
+                    if (!acceptedExtensions.Contains(filenameParts.Last())) continue;
 
-                return pathBuilt;
+                    var pathBuilt = Path.Combine(Directory.GetCurrentDirectory(), path);
+                    if (!Directory.Exists(pathBuilt))
+                    {
+                        Directory.CreateDirectory(pathBuilt);
+                    }
+                    pathBuilt += filenameParts.First();
+                    using FileStream stream = new(pathBuilt, FileMode.Create);
+                    file.CopyTo(stream);
+                    result.Add(pathBuilt);
+                }
+
+                return result.ToArray();
             });
         }
     }
