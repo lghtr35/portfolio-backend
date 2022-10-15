@@ -36,6 +36,11 @@
     <None Remove="EntityFramework" />
     <None Remove="Projects\" />
     <None Remove="Images\" />
+    <None Remove="Data\DTOs\Project\" />
+    <None Remove="Data\DTOs\Admin\" />
+    <None Remove="Data\DTOs\Auth\" />
+    <None Remove="Data\DTOs\Common\" />
+    <None Remove="Data\DTOs\Image\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Controllers\" />
@@ -46,5 +51,10 @@
     <Folder Include="Data\DTOs\" />
     <Folder Include="Projects\" />
     <Folder Include="Images\" />
+    <Folder Include="Data\DTOs\Project\" />
+    <Folder Include="Data\DTOs\Admin\" />
+    <Folder Include="Data\DTOs\Auth\" />
+    <Folder Include="Data\DTOs\Common\" />
+    <Folder Include="Data\DTOs\Image\" />
   </ItemGroup>
 </Project>

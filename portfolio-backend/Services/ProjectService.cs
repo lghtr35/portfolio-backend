@@ -1,68 +1,81 @@
 ﻿using portfolio_backend.Services.Interfaces;
 using portfolio_backend.Data.Repository;
 using portfolio_backend.Data.Entities;
+using portfolio_backend.Data.DTOs.Project;
 using Microsoft.EntityFrameworkCore;
+using portfolio_backend.Data.DTOs.Common;
+using System.Linq;
+using System.Data.SqlClient;
 
 namespace portfolio_backend.Services
 {
     public class ProjectService : IProjectService
     {
         private readonly AppDatabaseContext _context;
-        public ProjectService(AppDatabaseContext _context)
+        private readonly IFileUploadService _fileUploadService;
+        public ProjectService(AppDatabaseContext context, IFileUploadService fileUploadService)
         {
-            _context = _context;
+            _context = context;
+            _fileUploadService = fileUploadService;
         }
 
-        public async Task<Project> CreateProject(Project project)
+        public async Task<Project> CreateProject(ProjectCreateDTO projectDTO)
         {
+            Project project = new Project();
+            project.Header = projectDTO.Header;
+            project.Message = projectDTO.Message;
+            project.Link = projectDTO.Link;
+            project.PayloadPath = projectDTO.PayloadPath;
+
             _context.Projects.Add(project);
             await _context.SaveChangesAsync();
             return project;
         }
-        public async Task<IEnumerable<Project>> GetProjects(Dictionary<string, string> query)
+        public async Task<PageDTO<Project>> GetProjects(ProjectFilterDTO dto)
         {
-            if (query.Count == 0)
+            PageDTO<Project> response = new();
+            IQueryable<Project> queryable = this._context.Projects;
+            queryable = MakeQuery(queryable, dto);
+            IEnumerable<Project> list = await queryable.ToListAsync();
+            response.TotalRecords = list.Count();
+            int remaining = response.TotalRecords - (dto.Page * dto.Size);
+            if (remaining > 0)
             {
-                IEnumerable<Project> res = await _context.Projects.ToListAsync();
-                return res;
+                if (dto.Size > remaining)
+                {
+                    dto.Size = response.TotalRecords - (dto.Page * dto.Size);
+                }
+                response.PageSize = dto.Size;
+                response.PageNumber = dto.Page;
+                response.Content = list.Skip(dto.Page * dto.Size).Take(dto.Size);
             }
-            else
-            {
-                IQueryable<Project> queryable = this._context.Projects;
-                queryable = MakeQuery(queryable, query);
-                IEnumerable<Project> res = await queryable.ToListAsync();
-                return res;
-            }
+            return response;
         }
-        private static IQueryable<Project> MakeQuery(IQueryable<Project> queryable, Dictionary<string, string> query)
+        private static IQueryable<Project> MakeQuery(IQueryable<Project> queryable, ProjectFilterDTO query)
         {
-            if (query.ContainsKey("project_id"))
+            if (query.IdList != null)
             {
-                queryable = queryable.Where(item => item.ProjectId == Int32.Parse(query["project_id"]));
+                queryable = queryable.Where(item => query.IdList.Contains(item.ProjectId));
             }
-            if (query.ContainsKey("payload_path"))
+            if (query.PathList != null)
             {
-                queryable = queryable.Where(item => item.PayloadPath == query["payload_path"]);
+                queryable = queryable.Where(item => query.PathList.Contains(item.PayloadPath));
             }
-            if (query.ContainsKey("header"))
+            if (query.HeaderSearchString != null)
             {
-                queryable = queryable.Where(item => item.Header == query["header"]);
+                queryable = queryable.Where(item => item.Header.Contains(query.HeaderSearchString));
             }
-            if (query.ContainsKey("message"))
+            if (query.MessageSearchString != null)
             {
-                queryable = queryable.Where(item => item.Header == query["message"]);
+                queryable = queryable.Where(item => item.Message.Contains(query.MessageSearchString));
             }
-            if (query.ContainsKey("header"))
+            if (query.CreatedAtSearchString != null)
             {
-                queryable = queryable.Where(item => item.Header == query["header"]);
+                queryable = queryable.Where(item => item.CreatedAt.ToString().Contains(query.CreatedAtSearchString));
             }
-            if (query.ContainsKey("createdat"))
+            if (query.UpdatedAtSearchString != null)
             {
-                queryable = queryable.Where(item => item.CreatedAt.ToString() == query["createdAt"]);
-            }
-            if (query.ContainsKey("updatedat"))
-            {
-                queryable = queryable.Where(item => item.UpdatedAt.ToString() == query["updatedat"]);
+                queryable = queryable.Where(item => item.UpdatedAt.ToString().Contains(query.UpdatedAtSearchString));
             }
             return queryable;
         }
@@ -75,34 +88,60 @@ namespace portfolio_backend.Services
                 return res;
             });
         }
-        public async Task<Project?> UpdateProject(Project project)
+        public async Task<Project?> UpdateProject(ProjectUpdateDTO projectDTO)
         {
-            project.UpdatedAt = DateTime.UtcNow;
-            var res = await _context.Projects.FindAsync(project.ProjectId);
+
+            var res = await _context.Projects.FindAsync(projectDTO.ProjectId);
             if (res == null)
             {
                 return null;
             }
-            Type type = project.GetType();
-            foreach (var (prop, newValue) in from prop in type.GetProperties()
-                                             let newValue = type.GetProperty(prop.Name).GetValue(project)
-                                             where newValue != null
-                                             select (prop, newValue))
+
+            if (!string.IsNullOrEmpty(projectDTO.Header))
             {
-                type.GetProperty(prop.Name).SetValue(res, newValue);
+                res.Header = projectDTO.Header;
             }
 
+            if (!string.IsNullOrEmpty(projectDTO.Message))
+            {
+                res.Message = projectDTO.Message;
+            }
+
+            if (!string.IsNullOrEmpty(projectDTO.Link))
+            {
+                res.Link = projectDTO.Link;
+            }
+
+            if(projectDTO.Images != null)
+            {
+                res.Images = projectDTO.Images.ToArray();
+            }
+
+            res.UpdatedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
             return res;
         }
-        public async Task<IEnumerable<Project>> Delete(int[] id)
+        public async Task<IEnumerable<Project>> DeleteProject(int[] id)
         {
             var deleted = await _context.Projects.Where(item => Array.IndexOf(id, item.ProjectId) > -1).ToListAsync();
             _context.Remove(deleted);
             await _context.SaveChangesAsync();
             return deleted;
         }
-
+        public async Task<Project> UploadPayloadToAProject(ProjectUploadDTO dto)
+        {
+            Project project = await _context.Projects.Where(pr => pr.ProjectId == dto.ProjectId).FirstOrDefaultAsync();
+            if (project == null)
+            {
+                return null;
+            }
+            string[] accepted = new string[2] { "zip", "rar" };
+            IFormFile[] formFiles = new IFormFile[1] { dto.ProjectFile };
+            string[] paths = await _fileUploadService.UploadWithForm(formFiles, "../Projects", accepted);
+            project.PayloadPath = paths[0];
+            await _context.SaveChangesAsync();
+            return project;
+        }
     }
 }
 

@@ -3,8 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Net.Http.Headers;
 using portfolio_backend.Data.Entities;
-using portfolio_backend.Helpers;
 using portfolio_backend.Services.Interfaces;
+using portfolio_backend.Data.DTOs.Project;
+using portfolio_backend.Data.DTOs.Common;
 
 namespace portfolio_backend.Controllers
 {
@@ -18,11 +19,11 @@ namespace portfolio_backend.Controllers
 
         [Authorize]
         [HttpPost]
-        public async Task<ActionResult<Project>> Create([FromBody] ProjectCreateDTO project)
+        public async Task<ActionResult<Project>> Create([FromBody] ProjectCreateDTO projectDTO)
         {
             try
             {
-                return Ok(await this._projectService.CreateProject(project));
+                return Ok(await this._projectService.CreateProject(projectDTO));
             }
             catch (Exception err)
             {
@@ -31,7 +32,7 @@ namespace portfolio_backend.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<IEnumerable<Project>>> ReadOne(int id)
+        public async Task<ActionResult<Project?>> ReadOne(int id)
         {
             try
             {
@@ -44,22 +45,11 @@ namespace portfolio_backend.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Project>>> ReadAll()
+        public async Task<ActionResult<PageDTO<Project>>> ReadAll([FromQuery] ProjectFilterDTO dto)
         {
             try
             {
-                Dictionary<string, string> query = new();
-                string[]? keys = Request.Query.Keys.ToArray();
-
-                if (keys != null)
-                {
-                    for (int i = 0; i < keys.Length; i++)
-                    {
-                        query[keys[i].ToLower()] = Request.Query[keys[i]];
-                    }
-                }
-
-                return Ok(await this._projectService.GetProjects(query));
+                return Ok(await this._projectService.GetProjects(dto));
             }
             catch (Exception err)
             {
@@ -92,6 +82,20 @@ namespace portfolio_backend.Controllers
             catch (Exception err)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, err);
+            }
+        }
+
+        [Authorize]
+        [HttpPost("upload")]
+        public async Task<ActionResult<Project>> UploadProject([FromForm] ProjectUploadDTO dto)
+        {
+            try
+            {
+                return Ok(await this._projectService.UploadPayloadToAProject(dto));
+            }
+            catch (Exception err)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,err);
             }
         }
     }

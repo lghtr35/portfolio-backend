@@ -2,6 +2,9 @@ using Microsoft.AspNetCore.Mvc;
 using portfolio_backend.Data.Entities;
 using portfolio_backend.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using portfolio_backend.Data.DTOs.Common;
+using portfolio_backend.Data.DTOs.Image;
+using portfolio_backend.Data.DTOs.Project;
 
 namespace portfolio_backend.Controllers
 {
@@ -30,7 +33,7 @@ namespace portfolio_backend.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<IEnumerable<Image>>> ReadOne(int id)
+        public async Task<ActionResult<Image>> ReadOne(int id)
         {
             try
             {
@@ -43,21 +46,10 @@ namespace portfolio_backend.Controllers
         }
 #nullable enable
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Image>>> ReadAll()
+        public async Task<ActionResult<PageDTO<Image>>> ReadAll([FromQuery] ImageFilterDTO query)
         {
             try
             {
-                Dictionary<string, string> query = new();
-                string[]? keys = Request.Query.Keys.ToArray();
-
-                if (keys != null)
-                {
-                    for (int i = 0; i < keys.Length; i++)
-                    {
-                        query[keys[i].ToLower()] = Request.Query[keys[i]];
-                    }
-                }
-
                 return Ok(await this._imageService.GetImages(query));
             }
             catch (Exception err)
@@ -67,7 +59,7 @@ namespace portfolio_backend.Controllers
         }
 #nullable disable
         [HttpPut]
-        public async Task<ActionResult<Image>> Update([FromBody] Image img)
+        public async Task<ActionResult<Image>> Update([FromBody] ImageUpdateDTO img)
         {
             try
             {
@@ -85,6 +77,20 @@ namespace portfolio_backend.Controllers
             try
             {
                 return Ok(await this._imageService.Delete(id));
+            }
+            catch (Exception err)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, err);
+            }
+        }
+
+        [Authorize]
+        [HttpPost("upload")]
+        public async Task<ActionResult<Project>> UploadImage([FromForm] ImageUploadDTO dto)
+        {
+            try
+            {
+                return Ok(await this._imageService.UploadImage(dto));
             }
             catch (Exception err)
             {
