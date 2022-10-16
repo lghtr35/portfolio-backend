@@ -78,37 +78,49 @@ namespace portfolio_backend.Services
             return queryable;
         }
 
-        public Task<Image?> GetImage(int id)
+        public async Task<Image?> GetImage(int id)
         {
-            return Task.Run(() =>
-            {
-                Image res = _context.Images.Where(prop => prop.ImageId == id).FirstOrDefault();
-                return res;
-            });
+            Image? res = await _context.Images.Where(prop => prop.ImageId == id).Include(prop=>prop.Project).FirstOrDefaultAsync();
+            return res;
         }
-        public async Task<Image> UpdateImage(ImageUpdateDTO img)
+        public async Task<Image?> UpdateImage(ImageUpdateDTO img)
         {
-            var res = await _context.Images.FindAsync(img.ImageId);
+            var res = await _context.Images.Where(prop => prop.ImageId == img.ImageId).Include(prop => prop.Project).FirstOrDefaultAsync();
             if (res == null)
             {
                 return null;
             }
-            res.UpdatedAt = DateTime.UtcNow;
-            Type type = img.GetType();
-            foreach (var (prop, newValue) in from prop in type.GetProperties()
-                                             let newValue = type.GetProperty(prop.Name).GetValue(img)
-                                             where newValue != null
-                                             select (prop, newValue))
+            if (img.ImageName != null)
             {
-                type.GetProperty(prop.Name).SetValue(res, newValue);
+                res.ImageName = img.ImageName;
             }
-
+            if (img.ImagePath != null)
+            {
+                res.ImagePath = img.ImagePath;
+            }
+            if (img.ProjectId != null)
+            {
+                Project? project = await _context.Projects.Where(p => p.ProjectId == img.ProjectId).FirstOrDefaultAsync();
+                if (project != null)
+                {
+                    res.Project = project;
+                    List<Image> images = new(project.Images);
+                    images.Add(res);
+                    project.Images = images.ToList();
+                }
+            }
+            res.UpdatedAt = DateTime.UtcNow;
+            _context.Update(res);
             await _context.SaveChangesAsync();
             return res;
         }
-        public async Task<IEnumerable<Image>> Delete(int[] id)
+        public async Task<Image?> Delete(int id)
         {
-            var deleted = await _context.Images.Where(item => Array.IndexOf(id, item.ImageId) > -1).ToListAsync();
+            var deleted = await _context.Images.Where(item => item.ImageId == id).FirstOrDefaultAsync();
+            if (deleted == null)
+            {
+                return null;
+            }
             _context.Remove(deleted);
             await _context.SaveChangesAsync();
             return deleted;
@@ -117,7 +129,7 @@ namespace portfolio_backend.Services
         {
             List<Image> result = new();
             string[] accepted = new string[5] { "png", "jpg", "jpeg", "gif", "pdf" };
-            string[] paths = await _fileUploadService.UploadWithForm(dto.ImageFiles, "../Images", accepted);
+            string[] paths = await _fileUploadService.UploadWithForm(dto.ImageFiles, "Images/", accepted);
             foreach (string path in paths)
             {
                 Image image = new Image();

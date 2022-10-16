@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using portfolio_backend.Data.DTOs.Common;
 using System.Linq;
 using System.Data.SqlClient;
+using portfolio_backend.Data.DTOs.Image;
 
 namespace portfolio_backend.Services
 {
@@ -13,10 +14,12 @@ namespace portfolio_backend.Services
     {
         private readonly AppDatabaseContext _context;
         private readonly IFileUploadService _fileUploadService;
-        public ProjectService(AppDatabaseContext context, IFileUploadService fileUploadService)
+        private readonly IImageService _imageService;
+        public ProjectService(AppDatabaseContext context, IFileUploadService fileUploadService,IImageService imageService)
         {
             _context = context;
             _fileUploadService = fileUploadService;
+            _imageService = imageService;
         }
 
         public async Task<Project> CreateProject(ProjectCreateDTO projectDTO)
@@ -36,7 +39,7 @@ namespace portfolio_backend.Services
             PageDTO<Project> response = new();
             IQueryable<Project> queryable = this._context.Projects;
             queryable = MakeQuery(queryable, dto);
-            IEnumerable<Project> list = await queryable.ToListAsync();
+            IEnumerable<Project> list = await queryable.Include(prop=>prop.Images).ToListAsync();
             response.TotalRecords = list.Count();
             int remaining = response.TotalRecords - (dto.Page * dto.Size);
             if (remaining > 0)
@@ -80,18 +83,15 @@ namespace portfolio_backend.Services
             return queryable;
         }
 
-        public Task<Project?> GetProject(int id)
+        public async Task<Project?> GetProject(int id)
         {
-            return Task.Run(() =>
-            {
-                Project? res = _context.Projects.Where(prop => prop.ProjectId == id).FirstOrDefault();
+                Project? res = await _context.Projects.Where(prop => prop.ProjectId == id).Include(prop=>prop.Images).FirstOrDefaultAsync();
                 return res;
-            });
         }
         public async Task<Project?> UpdateProject(ProjectUpdateDTO projectDTO)
         {
 
-            var res = await _context.Projects.FindAsync(projectDTO.ProjectId);
+            Project? res = await _context.Projects.Where(prop => prop.ProjectId == projectDTO.ProjectId).Include(prop => prop.Images).FirstOrDefaultAsync();
             if (res == null)
             {
                 return null;
@@ -112,33 +112,70 @@ namespace portfolio_backend.Services
                 res.Link = projectDTO.Link;
             }
 
-            if(projectDTO.Images != null)
+            if(projectDTO.ImageIds != null)
             {
-                res.Images = projectDTO.Images.ToArray();
+                List<Image> images = new();
+                foreach(int imageId in projectDTO.ImageIds)
+                {
+                    Image? image = await _imageService.GetImage(imageId);
+                    if(image != null) {
+                        image.Project = res;
+                        images.Add(image);
+                    }
+                    
+                }
+                res.Images = images.ToList();
             }
 
             res.UpdatedAt = DateTime.UtcNow;
+            _context.Update(res);
             await _context.SaveChangesAsync();
             return res;
         }
-        public async Task<IEnumerable<Project>> DeleteProject(int[] id)
+        public async Task<Project?> DeleteProject(int id)
         {
-            var deleted = await _context.Projects.Where(item => Array.IndexOf(id, item.ProjectId) > -1).ToListAsync();
+            var deleted = await _context.Projects.Where(item => item.ProjectId == id).FirstOrDefaultAsync();
+            if (deleted == null)
+            {
+                return null;
+            }
             _context.Remove(deleted);
             await _context.SaveChangesAsync();
             return deleted;
         }
-        public async Task<Project> UploadPayloadToAProject(ProjectUploadDTO dto)
+        public async Task<Project?> UploadPayloadToAProject(ProjectUploadDTO dto)
         {
-            Project project = await _context.Projects.Where(pr => pr.ProjectId == dto.ProjectId).FirstOrDefaultAsync();
+            Project? project = await _context.Projects.FindAsync(dto.ProjectId);
             if (project == null)
             {
                 return null;
             }
             string[] accepted = new string[2] { "zip", "rar" };
-            IFormFile[] formFiles = new IFormFile[1] { dto.ProjectFile };
+            List<IFormFile> formFiles = new List<IFormFile>();
+            formFiles.Add(dto.ProjectFile);
             string[] paths = await _fileUploadService.UploadWithForm(formFiles, "../Projects", accepted);
             project.PayloadPath = paths[0];
+            await _context.SaveChangesAsync();
+            return project;
+        }
+
+        public async Task<Project?> UploadImageToAProject(ProjectUploadImageDTO dto)
+        {
+            Project? project = await _context.Projects.Where(prop=>prop.ProjectId == dto.ProjectId).Include(prop=>prop.Images).FirstOrDefaultAsync();
+            if (project == null)
+            {
+                return null;
+            }
+            ImageUploadDTO imageUploadDTO = new();
+            imageUploadDTO.ImageFiles = dto.Files.ToList();
+            List<Image> images = (await _imageService.UploadImage(imageUploadDTO)).ToList();
+            List<Image> projectImages = project.Images.ToList();
+            foreach(Image image in images)
+            {
+                projectImages.Add(image);
+            }
+            project.Images = projectImages.ToList();
+            _context.Projects.Update(project);
             await _context.SaveChangesAsync();
             return project;
         }

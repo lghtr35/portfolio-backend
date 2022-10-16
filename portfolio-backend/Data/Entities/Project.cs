@@ -9,12 +9,13 @@ namespace portfolio_backend.Data.Entities
         public string? PayloadPath { get; set; }
         public DateTime? CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
-        public virtual Image[]? Images { get; set; }
+        public virtual IEnumerable<Image> Images { get; set; }
 
         public Project()
         {
             Header = "";
             Message = "";
+            Images = new List<Image>();
         }
     }
 }

@@ -3,7 +3,7 @@ namespace portfolio_backend.Data.DTOs.Image
 {
     public class ImageUploadDTO
     {
-        public IFormFile[] ImageFiles { get; set; }
+        public List<IFormFile> ImageFiles { get; set; }
     }
 }
 

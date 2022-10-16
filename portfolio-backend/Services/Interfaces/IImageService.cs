@@ -8,8 +8,8 @@ namespace portfolio_backend.Services.Interfaces
     {
         Task<Image> CreateImage(Image img);
         Task<PageDTO<Image>> GetImages(ImageFilterDTO query);
-        Task<Image> UpdateImage(ImageUpdateDTO img);
-        Task<IEnumerable<Image>> Delete(int[] id);
+        Task<Image?> UpdateImage(ImageUpdateDTO img);
+        Task<Image?> Delete(int id);
         Task<Image?> GetImage(int id);
         Task<IEnumerable<Image>> UploadImage(ImageUploadDTO dto);
     }

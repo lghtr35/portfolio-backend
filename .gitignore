@@ -20,6 +20,13 @@ test-results/
 .DS_Store
 .AppleDouble
 .LSOverride
+*.zip
+*.rar
+*.png
+*.pdf
+*.jpeg
+*.jpg
+*.gif
 
 # Icon must end with two \r
 Icon

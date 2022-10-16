@@ -9,6 +9,8 @@ using portfolio_backend.Data.DTOs.Common;
 
 namespace portfolio_backend.Controllers
 {
+    [ApiController]
+    [Route("api/v1/[controller]")]
     public class ProjectController : ControllerBase
     {
         private readonly IProjectService _projectService;
@@ -67,13 +69,13 @@ namespace portfolio_backend.Controllers
             }
             catch (Exception err)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, err);
+                return StatusCode(StatusCodes.Status500InternalServerError, err.Message);
             }
         }
 
         [Authorize]
         [HttpDelete]
-        public async Task<ActionResult<Project>> Delete([FromQuery] int[] id)
+        public async Task<ActionResult<Project>> Delete([FromQuery] int id)
         {
             try
             {
@@ -96,6 +98,19 @@ namespace portfolio_backend.Controllers
             catch (Exception err)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError,err);
+            }
+        }
+        [Authorize]
+        [HttpPost("upload-image")]
+        public async Task<ActionResult<Project>> UploadImageToProject([FromForm] ProjectUploadImageDTO dto)
+        {
+            try
+            {
+                return Ok(await this._projectService.UploadImageToAProject(dto));
+            }
+            catch (Exception err)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, err);
             }
         }
     }

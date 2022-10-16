@@ -6,7 +6,7 @@ namespace portfolio_backend.Services
     {
         public FileUploadService() { }
 
-        public Task<string[]> UploadWithForm(IFormFile[] files, string path, string[] acceptedExtensions)
+        public Task<string[]> UploadWithForm(IEnumerable<IFormFile> files, string path, string[] acceptedExtensions)
         {
             return Task.Run(() =>
             {
@@ -21,7 +21,7 @@ namespace portfolio_backend.Services
                     {
                         Directory.CreateDirectory(pathBuilt);
                     }
-                    pathBuilt += filenameParts.First();
+                    pathBuilt += file.FileName;
                     using FileStream stream = new(pathBuilt, FileMode.Create);
                     file.CopyTo(stream);
                     result.Add(pathBuilt);

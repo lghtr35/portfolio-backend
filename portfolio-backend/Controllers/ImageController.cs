@@ -28,7 +28,7 @@ namespace portfolio_backend.Controllers
             }
             catch (Exception err)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, err);
+                return StatusCode(StatusCodes.Status500InternalServerError, err.Message);
             }
         }
 
@@ -72,7 +72,7 @@ namespace portfolio_backend.Controllers
         }
 
         [HttpDelete]
-        public async Task<ActionResult<Image>> Delete([FromQuery] int[] id)
+        public async Task<ActionResult<Image>> Delete([FromQuery] int id)
         {
             try
             {

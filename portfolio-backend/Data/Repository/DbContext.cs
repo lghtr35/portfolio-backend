@@ -8,6 +8,7 @@ namespace portfolio_backend.Data.Repository
         public AppDatabaseContext(DbContextOptions<AppDatabaseContext> options)
             : base(options)
         {
+            //Database.EnsureDeleted();
             Database.EnsureCreated();
         }
         public DbSet<Image> Images { get; set; }
@@ -19,14 +20,22 @@ namespace portfolio_backend.Data.Repository
             // Admin Infrastructure
             modelBuilder.Entity<Admin>().HasKey(prop => prop.UserId);
             // Project Relations and Infrastructure
-            modelBuilder.Entity<Project>().HasKey(prop => prop.ProjectId);
-            modelBuilder.Entity<Project>().Property(prop => prop.CreatedAt).HasDefaultValueSql("getutcdate()");
-            modelBuilder.Entity<Project>().Property(prop => prop.UpdatedAt).HasDefaultValueSql("getutcdate()");
-            modelBuilder.Entity<Project>().HasMany(prop => prop.Images).WithOne();
+            modelBuilder.Entity<Project>(entity =>
+            {
+                entity.HasKey(prop => prop.ProjectId);
+                entity.Property(prop => prop.ProjectId).ValueGeneratedOnAdd();
+                entity.Property(prop => prop.CreatedAt).HasDefaultValueSql("getutcdate()");
+                entity.Property(prop => prop.UpdatedAt).HasDefaultValueSql("getutcdate()");
+            });
             // Image Relations and Infrastructure
-            modelBuilder.Entity<Image>().HasKey(prop => prop.ImageId);
-            modelBuilder.Entity<Image>().Property(prop => prop.CreatedAt).HasDefaultValueSql("getutcdate()");
-            modelBuilder.Entity<Image>().Property(prop => prop.UpdatedAt).HasDefaultValueSql("getutcdate()");
+            modelBuilder.Entity<Image>(entity =>
+            {
+                entity.HasKey(prop => prop.ImageId);
+                entity.Property(prop => prop.CreatedAt).HasDefaultValueSql("getutcdate()");
+                entity.Property(prop => prop.UpdatedAt).HasDefaultValueSql("getutcdate()");
+                entity.HasOne(prop => prop.Project).WithMany(prop_else => prop_else.Images).HasForeignKey(prop => prop.ProjectId).OnDelete(DeleteBehavior.SetNull);
+            });
+
             // Base ORM
             base.OnModelCreating(modelBuilder);
         }
