@@ -153,7 +153,7 @@ namespace portfolio_backend.Services
             string[] accepted = new string[2] { "zip", "rar" };
             List<IFormFile> formFiles = new List<IFormFile>();
             formFiles.Add(dto.ProjectFile);
-            string[] paths = await _fileUploadService.UploadWithForm(formFiles, "../Projects", accepted);
+            string[] paths = await _fileUploadService.UploadWithForm(formFiles, "Projects/", accepted);
             project.PayloadPath = paths[0];
             await _context.SaveChangesAsync();
             return project;
