@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <RootNamespace>Portfolio.Backend.Common</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Data\" />
+    <None Remove="Helpers\" />
+    <None Remove="Exceptions\" />
+    <None Remove="Data\Responses\" />
+    <None Remove="Data\Responses\Common\" />
+    <None Remove="Data\Requests\Common\" />
+    <None Remove="Data\Responses\Auth\" />
+    <None Remove="Data\Responses\Project\" />
+    <None Remove="Data\Responses\Image\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Data\" />
+    <Folder Include="Helpers\" />
+    <Folder Include="Exceptions\" />
+    <Folder Include="Data\Responses\" />
+    <Folder Include="Data\Responses\Common\" />
+    <Folder Include="Data\Requests\Common\" />
+    <Folder Include="Data\Responses\Auth\" />
+    <Folder Include="Data\Responses\Project\" />
+    <Folder Include="Data\Responses\Image\" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.9" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.9" />
+  </ItemGroup>
+</Project>
