@@ -37,6 +37,21 @@ namespace Portfolio.Backend.Controllers
             }
         }
 
+        [HttpGet("latest")]
+        public async Task<ActionResult<ProjectResponse?>> ReadLatestProjects([FromQuery] int? count)
+        {
+            try
+            {
+                _logger.LogInformation("Read Project recieved a request");
+                return Ok(await _projectService.GetProjectsOrderedWithCount(count.GetValueOrDefault(3)));
+            }
+            catch (Exception err)
+            {
+                _logger.LogError("An error occured in ProjectController due to: " + err.Message, err);
+                return StatusCode(StatusCodes.Status500InternalServerError, err.ToString());
+            }
+        }
+
         [HttpGet("{id}")]
         public async Task<ActionResult<ProjectResponse?>> ReadOne(int id)
         {

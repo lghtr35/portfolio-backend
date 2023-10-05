@@ -13,6 +13,7 @@ namespace Portfolio.Backend.Services.Interfaces
         Task<ProjectResponse?> GetProject(int id);
         Task<ProjectResponse?> UploadImageToProject(ProjectUploadImageRequest dto);
         Task<ProjectResponse?> DeleteImageFromProject(ProjectDeleteImageRequest dto);
+        Task<PageResponse<ProjectResponse>> GetProjectsOrderedWithCount(int count);
     }
 }
 

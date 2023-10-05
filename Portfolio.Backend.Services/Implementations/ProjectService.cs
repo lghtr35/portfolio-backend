@@ -210,6 +210,32 @@ namespace Portfolio.Backend.Services.Implementations
             await _context.SaveChangesAsync();
             return new ProjectResponse(project);
         }
+
+        public async Task<PageResponse<ProjectResponse>> GetProjectsOrderedWithCount(int count)
+        {
+            PageResponse<ProjectResponse> response = new();
+            IQueryable<Project> queryable = _context.Projects;
+            IEnumerable<ProjectResponse> list = await queryable
+                .OrderByDescending(p => p.UpdatedAt)
+                .Include(prop => prop.Images)
+                .Select(p => new ProjectResponse(p))
+                .ToListAsync();
+            response.TotalRecords = list.Count();
+            if (response.TotalRecords <= count)
+            {
+                response.Content = list.Take(count).ToArray();
+                response.ItemsInPage = count;
+                response.PageSize = count;
+            }
+            else
+            {
+                response.Content = list.Take(response.TotalRecords).ToArray();
+                response.ItemsInPage = response.TotalRecords;
+                response.PageSize = response.TotalRecords;
+            }
+            response.PageNumber = 0;
+            return response;
+        }
     }
 }
 
