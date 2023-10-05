@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Portfolio.Backend.Common.Data.Entities;
 using Portfolio.Backend.Common.Data.Repository;
@@ -68,16 +69,14 @@ namespace Portfolio.Backend.Services.Implementations
             ).Select(p => new ProjectResponse(p)).ToListAsync();
             response.TotalRecords = list.Count();
             int remaining = response.TotalRecords - dto.Page * dto.Size;
-            if (remaining > 0)
+            response.Content = list.Skip(dto.Page * dto.Size).Take(dto.Size).ToArray();
+            response.ItemsInPage = dto.Size;
+            if (dto.Size > remaining)
             {
-                if (dto.Size > remaining)
-                {
-                    dto.Size = response.TotalRecords - dto.Page * dto.Size;
-                }
-                response.PageSize = dto.Size;
-                response.PageNumber = dto.Page;
-                response.Content = list.Skip(dto.Page * dto.Size).Take(dto.Size).ToArray();
+                response.ItemsInPage = response.TotalRecords - dto.Page * dto.Size;
             }
+            response.PageSize = dto.Size;
+            response.PageNumber = dto.Page;
             return response;
         }
         private static IQueryable<Project> MakeQuery(IQueryable<Project> queryable, ProjectFilterRequest query)
@@ -106,7 +105,7 @@ namespace Portfolio.Backend.Services.Implementations
             {
                 queryable = queryable.Where(item => item.UpdatedAt.ToString().Contains(query.UpdatedAtSearchString));
             }
-            return queryable;
+            return queryable.OrderBy(p => p.CreatedAt);
         }
 
         public async Task<ProjectResponse?> GetProject(int id)
