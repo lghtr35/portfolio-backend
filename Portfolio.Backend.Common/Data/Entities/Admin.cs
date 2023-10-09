@@ -1,3 +1,5 @@
+using System.Data.SqlTypes;
+
 namespace Portfolio.Backend.Common.Data.Entities
 {
     public class Admin

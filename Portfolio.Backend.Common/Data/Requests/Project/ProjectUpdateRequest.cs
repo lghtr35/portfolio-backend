@@ -10,6 +10,7 @@ namespace Portfolio.Backend.Common.Data.Requests.Project
         public string? Header { get; set; }
         public string? Message { get; set; }
         public string? Link { get; set; }
+        public bool? IsDownloadable { get; set; }
         public IFormFile? ProjectFile { get; set; }
     }
 }

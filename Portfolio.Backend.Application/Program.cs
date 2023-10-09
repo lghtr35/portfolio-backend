@@ -12,22 +12,23 @@ using Microsoft.AspNetCore.Http.Features;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.Configure<FormOptions>(o => o.MultipartBodyLengthLimit = 1024*1024*1024);
+builder.Services.Configure<FormOptions>(o => o.MultipartBodyLengthLimit = 1024 * 1024 * 1024);
 
 builder.Services.AddCors(o => o.AddPolicy(name: "DebugAppPolicy", policy => { policy.WithOrigins("http://localhost:3000").AllowAnyHeader().AllowAnyMethod(); }));
 
 builder.Services.AddControllers().AddJsonOptions(options => options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve);
 
-builder.Services.AddDbContext<AppDatabaseContext>(optionsAction =>
-    {
-        optionsAction.UseSqlServer(builder.Configuration.GetConnectionString("SqlServer"));
-    });
+builder.Services.AddDbContext<AppDatabaseContext>(options =>
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServer"), b => b.MigrationsAssembly("Portfolio.Backend.Application"));
+});
 
 builder.Services.AddSingleton<IMailService, MailService>();
 builder.Services.AddTransient<IImageService, ImageService>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<IProjectService, ProjectService>();
+builder.Services.AddScoped<IContentService, ContentService>();
 builder.Services.AddSingleton<DatabaseHelper>();
 
 builder.Services.AddSwaggerGen(c =>

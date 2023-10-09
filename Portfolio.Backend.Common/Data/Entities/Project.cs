@@ -7,6 +7,7 @@ namespace Portfolio.Backend.Common.Data.Entities
         public string Message { get; set; }
         public string? Link { get; set; }
         public string PayloadPath { get; set; }
+        public bool IsDownloadable { get; set; }
         public DateTime? CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public IList<Image>? Images { get; set; }

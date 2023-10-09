@@ -37,7 +37,7 @@ namespace Portfolio.Backend.Controllers
                 if (isCreated)
                     return Ok(isCreated);
                 else
-                    return Problem("Admin count is at the threshold",statusCode: StatusCodes.Status405MethodNotAllowed);
+                    return Problem("Admin count is at the threshold", statusCode: StatusCodes.Status405MethodNotAllowed);
             }
             catch (Exception err)
             {
@@ -57,7 +57,12 @@ namespace Portfolio.Backend.Controllers
             try
             {
                 _logger.LogInformation("Authenticate Admin recieved a request");
-                return Ok(await _authenticationService.GenerateToken(admin.Username, admin.Password));
+                var token = await _authenticationService.GenerateToken(admin.Username, admin.Password);
+                if (string.IsNullOrEmpty(token)) throw new UnauthorizedAccessException("unsucsessful login with given info, check request");
+                var adminLogin = new LoginResponse();
+                adminLogin.Token = token;
+                adminLogin.Username = admin.Username;
+                return Ok(adminLogin);
             }
             catch (Exception err)
             {

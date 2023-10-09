@@ -38,6 +38,7 @@ namespace Portfolio.Backend.Services.Implementations
             project.Header = projectDTO.Header;
             project.Message = projectDTO.Message;
             project.Link = projectDTO.Link;
+            project.IsDownloadable = projectDTO.IsDownloadable;
             var imgs = new List<Image>();
             if (!QueryConditionManager.IsFileExtensionAccepted(_accepted, projectDTO.ProjectFile))
             {
@@ -111,6 +112,10 @@ namespace Portfolio.Backend.Services.Implementations
         public async Task<ProjectResponse?> GetProject(int id)
         {
             Project? res = await _context.Projects.Where(prop => prop.ProjectId == id).Include(prop => prop.Images).FirstOrDefaultAsync();
+            if (res == null)
+            {
+                throw new ObjectNotFoundException("No project with the given id have been found");
+            }
             return new ProjectResponse(res);
         }
         public async Task<ProjectResponse?> UpdateProject(ProjectUpdateRequest projectDTO)
@@ -119,7 +124,7 @@ namespace Portfolio.Backend.Services.Implementations
             Project? res = await _context.Projects.Where(prop => prop.ProjectId == projectDTO.ProjectId).Include(prop => prop.Images).FirstOrDefaultAsync();
             if (res == null)
             {
-                return null;
+                throw new ObjectNotFoundException("No project with the given id have been found");
             }
 
             if (!string.IsNullOrEmpty(projectDTO.Header))
@@ -137,7 +142,9 @@ namespace Portfolio.Backend.Services.Implementations
                 res.Link = projectDTO.Link;
             }
 
-            if(projectDTO.ProjectFile != null)
+            res.IsDownloadable = projectDTO.IsDownloadable.GetValueOrDefault(res.IsDownloadable);
+
+            if (projectDTO.ProjectFile != null)
             {
                 if (!QueryConditionManager.IsFileExtensionAccepted(_accepted, projectDTO.ProjectFile))
                 {
@@ -162,7 +169,7 @@ namespace Portfolio.Backend.Services.Implementations
             }
             foreach (Image image in deleted.Images)
             {
-                _imageService.Delete(image.ImageId);
+                await _imageService.DeleteImage(image.ImageId);
             }
             FileHelper.DeleteFile(deleted.PayloadPath);
             _context.Remove(deleted);
@@ -178,12 +185,12 @@ namespace Portfolio.Backend.Services.Implementations
                 throw new ObjectNotFoundException("No project with the given id have been found");
             }
             List<Image> images = new();
-            foreach(var img in dto.Images)
+            foreach (var img in dto.Images)
             {
                 ImageCreateRequest createRequest = new();
                 createRequest.ImageName = img.Item1;
                 createRequest.ImageFile = img.Item2;
-                images.Add(await _imageService.CreateImage(createRequest,project));
+                images.Add(await _imageService.CreateImage(createRequest, project));
             }
             List<Image> projectImages = project.Images.ToList();
             foreach (Image image in images)
@@ -211,7 +218,7 @@ namespace Portfolio.Backend.Services.Implementations
             return new ProjectResponse(project);
         }
 
-        public async Task<PageResponse<ProjectResponse>> GetProjectsOrderedWithCount(int count)
+        public async Task<PageResponse<ProjectResponse>> GetProjectsLatestWithCount(int count)
         {
             PageResponse<ProjectResponse> response = new();
             IQueryable<Project> queryable = _context.Projects;
@@ -219,6 +226,7 @@ namespace Portfolio.Backend.Services.Implementations
                 .OrderByDescending(p => p.UpdatedAt)
                 .Include(prop => prop.Images)
                 .Select(p => new ProjectResponse(p))
+                .Take(count)
                 .ToListAsync();
             response.TotalRecords = list.Count();
             if (response.TotalRecords <= count)
@@ -235,6 +243,15 @@ namespace Portfolio.Backend.Services.Implementations
             }
             response.PageNumber = 0;
             return response;
+        }
+
+        public async Task<ProjectFileResponse> GetProjectFile(int id)
+        {
+            Project? project = await _context.Projects.Where(p => p.ProjectId == id).FirstOrDefaultAsync();
+            if (project == null) throw new ObjectNotFoundException("No project with the given id have been found");
+            if (!project.IsDownloadable) throw new UnauthorizedAccessException("This project is not downloadable");
+
+            return new ProjectFileResponse(project);
         }
     }
 }

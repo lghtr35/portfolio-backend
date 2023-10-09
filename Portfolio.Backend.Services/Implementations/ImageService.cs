@@ -38,9 +38,9 @@ namespace Portfolio.Backend.Services.Implementations
             }
 
             image.ImageName = img.ImageName;
-            if(project != null)
+            if (project != null)
             {
-                image.PayloadPath = FileHelper.CreateFileAndFolder(string.Format("{0}/{1}", _saveDirectory, project.Header.Replace(" ","_")), img.ImageFile);
+                image.PayloadPath = FileHelper.CreateFileAndFolder(string.Format("{0}/{1}", _saveDirectory, project.Header.Replace(" ", "_")), img.ImageFile);
             }
             else
             {
@@ -93,8 +93,23 @@ namespace Portfolio.Backend.Services.Implementations
         public async Task<Image?> GetImage(int id)
         {
             Image? res = await _context.Images.Where(prop => prop.ImageId == id).FirstOrDefaultAsync();
+            if (res == null)
+            {
+                throw new ObjectNotFoundException("No project with the given id have been found");
+            }
             return res;
         }
+
+        public async Task<Image> GetImageWithName(string name)
+        {
+            Image? res = await _context.Images.Where(prop => prop.ImageName == name).FirstOrDefaultAsync();
+            if (res == null)
+            {
+                throw new ObjectNotFoundException("No project with the given id have been found");
+            }
+            return res;
+        }
+
         public async Task<Image?> UpdateImage(ImageUpdateRequest img)
         {
             var res = await _context.Images.Where(prop => prop.ImageId == img.ImageId).Include(prop => prop.Project).FirstOrDefaultAsync();
@@ -106,7 +121,7 @@ namespace Portfolio.Backend.Services.Implementations
             {
                 res.ImageName = img.ImageName;
             }
-            if( img.ImageFile != null)
+            if (img.ImageFile != null)
             {
                 if (!QueryConditionManager.IsFileExtensionAccepted(_accepted, img.ImageFile))
                 {
@@ -133,7 +148,7 @@ namespace Portfolio.Backend.Services.Implementations
             await _context.SaveChangesAsync();
             return res;
         }
-        public async void Delete(int id)
+        public async Task DeleteImage(int id)
         {
             var deleted = await _context.Images.Where(item => item.ImageId == id).FirstOrDefaultAsync();
             if (deleted == null)

@@ -37,13 +37,28 @@ namespace Portfolio.Backend.Controllers
             }
         }
 
+        [HttpGet("download/{id}")]
+        public async Task<ActionResult<ProjectFileResponse?>> DownloadOne(int id)
+        {
+            try
+            {
+                _logger.LogInformation("Download Project recieved a request");
+                return Ok(await _projectService.GetProjectFile(id));
+            }
+            catch (Exception err)
+            {
+                _logger.LogError("An error occured in ProjectController due to: " + err.Message, err);
+                return StatusCode(StatusCodes.Status500InternalServerError, err.ToString());
+            }
+        }
+
         [HttpGet("latest")]
         public async Task<ActionResult<ProjectResponse?>> ReadLatestProjects([FromQuery] int? count)
         {
             try
             {
                 _logger.LogInformation("Read Project recieved a request");
-                return Ok(await _projectService.GetProjectsOrderedWithCount(count.GetValueOrDefault(3)));
+                return Ok(await _projectService.GetProjectsLatestWithCount(count.GetValueOrDefault(3)));
             }
             catch (Exception err)
             {
@@ -85,7 +100,7 @@ namespace Portfolio.Backend.Controllers
         [Authorize]
         [HttpPut]
         [RequestSizeLimit(1105199104)]
-        public async Task<ActionResult<ProjectResponse>> Update([FromBody] ProjectUpdateRequest project)
+        public async Task<ActionResult<ProjectResponse>> Update([FromForm] ProjectUpdateRequest project)
         {
             try
             {

@@ -5,13 +5,14 @@ using Portfolio.Backend.Common.Data.Responses.Image;
 
 namespace Portfolio.Backend.Common.Data.Responses.Project
 {
-	public class ProjectResponse : BaseControllerResponse
+    public class ProjectResponse : BaseControllerResponse
     {
         public int ProjectId { get; set; }
         public string ProjectTitle { get; set; }
         public string ProjectDescription { get; set; }
         public string? Link { get; set; }
         public string PayloadPath { get; set; }
+        public bool IsDownloadable { get; set; }
         public DateTime? CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public ImageResponse[]? Images { get; set; }
@@ -33,6 +34,7 @@ namespace Portfolio.Backend.Common.Data.Responses.Project
             CreatedAt = project.CreatedAt;
             UpdatedAt = project.UpdatedAt;
             Images = project.Images?.Select(i => new ImageResponse(i)).ToArray();
+            IsDownloadable = project.IsDownloadable;
         }
     }
 }

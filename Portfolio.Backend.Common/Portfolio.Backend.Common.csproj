@@ -17,6 +17,8 @@
     <None Remove="Data\Responses\Auth\" />
     <None Remove="Data\Responses\Project\" />
     <None Remove="Data\Responses\Image\" />
+    <None Remove="Data\Responses\Content\" />
+    <None Remove="Data\Requests\Content\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Data\" />
@@ -28,6 +30,8 @@
     <Folder Include="Data\Responses\Auth\" />
     <Folder Include="Data\Responses\Project\" />
     <Folder Include="Data\Responses\Image\" />
+    <Folder Include="Data\Responses\Content\" />
+    <Folder Include="Data\Requests\Content\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />

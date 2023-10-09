@@ -9,6 +9,7 @@ public interface IImageService
     Task<Image> CreateImage(ImageCreateRequest img, Project? project = null);
     Task<PageResponse<Image>> GetImages(ImageFilterRequest query);
     Task<Image?> UpdateImage(ImageUpdateRequest img);
-    void Delete(int id);
+    Task DeleteImage(int id);
     Task<Image?> GetImage(int id);
+    Task<Image> GetImageWithName(string name);
 }

@@ -8,16 +8,16 @@ namespace Portfolio.Backend.Common.Data.Repository
         public AppDatabaseContext(DbContextOptions<AppDatabaseContext> options)
             : base(options)
         {
-            //Database.EnsureDeleted();
-            Database.EnsureCreated();
+            Database.Migrate();
         }
         public DbSet<Image> Images { get; set; }
         public DbSet<Project> Projects { get; set; }
         public DbSet<Admin> Admins { get; set; }
+        public DbSet<Content> Contents { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Admin Infrastructure
+            // Admin Relations and Infrastructure
             modelBuilder.Entity<Admin>().HasKey(prop => prop.UserId);
 
             // Project Relations and Infrastructure
@@ -45,6 +45,16 @@ namespace Portfolio.Backend.Common.Data.Repository
                 .Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("getutcdate()");
 
+            // Content Relations and Infrastructure
+            modelBuilder.Entity<Content>().HasKey(e => e.ContentId);
+
+            modelBuilder.Entity<Content>()
+                .Property(e => e.CreatedAt)
+                .HasDefaultValueSql("getutcdate()");
+
+            modelBuilder.Entity<Content>()
+                .Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("getutcdate()");
             // Base ORM
             base.OnModelCreating(modelBuilder);
         }
