@@ -56,6 +56,24 @@ namespace Portfolio.Backend.Controllers
         }
 
         [Authorize]
+        [HttpGet]
+        public async Task<ActionResult<PageResponse<ImageResponse>>> ReadAll([FromQuery] ImageFilterRequest dto)
+        {
+            try
+            {
+                _logger.LogInformation("Read All Images recieved a request");
+                var res = await _imageService.GetImages(dto);
+                if (res.ItemsInPage == 0) throw new BadHttpRequestException("Filter returns no results");
+                return Ok(res);
+            }
+            catch (Exception err)
+            {
+                _logger.LogError("An error occured in ImageController due to: " + err.Message, err);
+                return StatusCode(StatusCodes.Status500InternalServerError, err.ToString());
+            }
+        }
+
+        [Authorize]
         [HttpPut]
         [RequestSizeLimit(1105199104)]
         public async Task<ActionResult<ImageResponse>> Update([FromForm] ImageUpdateRequest Image)

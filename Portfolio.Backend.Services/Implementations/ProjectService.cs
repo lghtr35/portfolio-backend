@@ -225,6 +225,7 @@ namespace Portfolio.Backend.Services.Implementations
             IEnumerable<ProjectResponse> list = await queryable
                 .OrderByDescending(p => p.UpdatedAt)
                 .Include(prop => prop.Images)
+                .Where(p => p.Images.Count > 0)
                 .Select(p => new ProjectResponse(p))
                 .Take(count)
                 .ToListAsync();

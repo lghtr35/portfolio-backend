@@ -6,9 +6,9 @@ namespace Portfolio.Backend.Common.Data.Requests.Image
     public class ImageCreateRequest
     {
         [Required]
-        public string ImageName { get; set; }
+        public string? ImageName { get; set; }
         [Required]
-        public IFormFile ImageFile { get; set; }
+        public IFormFile? ImageFile { get; set; }
     }
 }
 

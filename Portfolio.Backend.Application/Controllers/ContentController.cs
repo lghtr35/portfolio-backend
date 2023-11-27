@@ -1,7 +1,9 @@
 ﻿using System;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Portfolio.Backend.Common;
 using Portfolio.Backend.Common.Data.Requests.Content;
+using Portfolio.Backend.Common.Data.Responses.Common;
 using Portfolio.Backend.Common.Data.Responses.Content;
 using Portfolio.Backend.Services.Interfaces;
 
@@ -66,13 +68,29 @@ namespace Portfolio.Backend.Controllers
         }
 
         [Authorize]
+        [HttpGet("Place")]
+        public async Task<ActionResult<IDictionary<string, ContentLayoutResponse>>> ReadAllByPlace()
+        {
+            try
+            {
+                _logger.LogInformation("Read All Contents By Place recieved a request");
+                return Ok(await _contentService.GetContentsByPlace());
+            }
+            catch (Exception err)
+            {
+                _logger.LogError("An error occured in ContentController due to: " + err.Message, err);
+                return StatusCode(StatusCodes.Status500InternalServerError, err.ToString());
+            }
+        }
+
+        [Authorize]
         [HttpGet]
-        public async Task<ActionResult<IDictionary<string, ContentLayoutResponse>>> ReadAll()
+        public async Task<ActionResult<PageResponse<ContentResponse>>> ReadAll([FromQuery] ContentFilterRequest dto)
         {
             try
             {
                 _logger.LogInformation("Read All Contents recieved a request");
-                return Ok(await _contentService.GetContents());
+                return Ok(await _contentService.GetContents(dto));
             }
             catch (Exception err)
             {

@@ -51,24 +51,22 @@ namespace Portfolio.Backend.Services.Implementations
             return image;
         }
 
-        public async Task<PageResponse<Image>> GetImages(ImageFilterRequest query)
+        public async Task<PageResponse<Image>> GetImages(ImageFilterRequest dto)
         {
             PageResponse<Image> response = new();
             IQueryable<Image> queryable = _context.Images;
-            queryable = MakeQuery(queryable, query);
-            IEnumerable<Image> images = await queryable.ToListAsync();
-            response.TotalRecords = images.Count();
-            int remaining = response.TotalRecords - query.Page * query.Size;
-            if (remaining > 0)
+            queryable = MakeQuery(queryable, dto);
+            IEnumerable<Image> list = await queryable.ToListAsync();
+            response.TotalRecords = list.Count();
+            int remaining = response.TotalRecords - dto.Page * dto.Size;
+            response.Content = list.Skip(dto.Page * dto.Size).Take(dto.Size).ToArray();
+            response.ItemsInPage = dto.Size;
+            if (dto.Size > remaining)
             {
-                if (query.Size > remaining)
-                {
-                    query.Size = response.TotalRecords - query.Page * query.Size;
-                }
-                response.PageSize = query.Size;
-                response.PageNumber = query.Page;
-                response.Content = images.Skip(query.Page * query.Size).Take(query.Size).ToArray();
+                response.ItemsInPage = response.TotalRecords - dto.Page * dto.Size;
             }
+            response.PageSize = dto.Size;
+            response.PageNumber = dto.Page;
             return response;
 
         }

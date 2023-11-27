@@ -1,7 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Portfolio.Backend.Common;
 using Portfolio.Backend.Common.Data.Entities;
 using Portfolio.Backend.Common.Data.Repository;
 using Portfolio.Backend.Common.Data.Requests.Content;
+using Portfolio.Backend.Common.Data.Responses.Common;
 using Portfolio.Backend.Common.Data.Responses.Content;
 using Portfolio.Backend.Common.Exceptions;
 using Portfolio.Backend.Services.Interfaces;
@@ -51,7 +53,7 @@ namespace Portfolio.Backend.Services.Implementations
             return new ContentResponse(res);
         }
 
-        public async Task<IDictionary<string, ContentLayoutResponse>> GetContents()
+        public async Task<IDictionary<string, ContentLayoutResponse>> GetContentsByPlace()
         {
             IList<string> places = await _context.Contents
                 .Select(p => p.Place)
@@ -65,6 +67,53 @@ namespace Portfolio.Backend.Services.Implementations
                 res.Add(place, await GetPageContent(new ContentGetPageRequest(place)));
             }
             return res;
+        }
+
+        public async Task<PageResponse<ContentResponse>> GetContents(ContentFilterRequest dto)
+        {
+            PageResponse<ContentResponse> response = new();
+            IQueryable<Content> queryable = _context.Contents;
+            queryable = MakeQuery(queryable, dto);
+            IEnumerable<ContentResponse> list = await queryable.Select(c => new ContentResponse(c)).ToListAsync();
+            response.TotalRecords = list.Count();
+            int remaining = response.TotalRecords - dto.Page * dto.Size;
+            response.Content = list.Skip(dto.Page * dto.Size).Take(dto.Size).ToArray();
+            response.ItemsInPage = dto.Size;
+            if (dto.Size > remaining)
+            {
+                response.ItemsInPage = response.TotalRecords - dto.Page * dto.Size;
+            }
+            response.PageSize = dto.Size;
+            response.PageNumber = dto.Page;
+            return response;
+        }
+        private static IQueryable<Content> MakeQuery(IQueryable<Content> queryable, ContentFilterRequest query)
+        {
+            if (query.IdList != null)
+            {
+                queryable = queryable.Where(item => query.IdList.Contains(item.ContentId));
+            }
+            if (query.PlaceSearchString != null)
+            {
+                queryable = queryable.Where(item => item.Place.Contains(query.PlaceSearchString));
+            }
+            if (query.LocationSearchString != null)
+            {
+                queryable = queryable.Where(item => item.Location.Contains(query.LocationSearchString));
+            }
+            if (query.PayloadSearchString != null)
+            {
+                queryable = queryable.Where(item => item.Payload.Contains(query.PayloadSearchString));
+            }
+            if (query.CreatedAtSearchString != null)
+            {
+                queryable = queryable.Where(item => item.CreatedAt.ToString().Contains(query.CreatedAtSearchString));
+            }
+            if (query.UpdatedAtSearchString != null)
+            {
+                queryable = queryable.Where(item => item.UpdatedAt.ToString().Contains(query.UpdatedAtSearchString));
+            }
+            return queryable.OrderBy(p => p.CreatedAt);
         }
 
         public async Task<ContentLayoutResponse> GetPageContent(ContentGetPageRequest contentDTO)

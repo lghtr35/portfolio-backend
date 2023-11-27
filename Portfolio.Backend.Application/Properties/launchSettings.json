@@ -20,7 +20,8 @@
     "portfolio_backend": {
       "commandName": "Project",
       "launchBrowser": true,
-      "applicationUrl": "http://localhost:4426",
+      "applicationUrl": "http://localhost:4426;https://localhost:5001",
+      "launchUrl": "swagger",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

@@ -17,12 +17,12 @@ namespace Portfolio.Backend.Services.Implementations
 
         public async Task<Mail> SendMail(Mail mail)
         {
-            MailAddress to = new(mail.Destination);
-            MailAddress from = new("noreply@serdilcakmak.com");
-            MailMessage msg = new(from, to);
-            msg.Subject = mail.Subject;
-            msg.Body = "<h1>Sent by: " + mail.Sender + "</h1><br/>" + "<pre>" + mail.Message + "</pre>";
-            msg.IsBodyHtml = true;
+            MailMessage msg = new("noreply@serdilcakmak.com", mail.Destination)
+            {
+                Subject = mail.Subject,
+                Body = "<h1>Sent by: " + mail.Sender + "</h1><br/>" + "<pre>" + mail.Message + "</pre>",
+                IsBodyHtml = true
+            };
             var auth = configuration.GetSection("EmailConfig").GetChildren().ToList();
             var id = auth[0].Value;
             var password = auth[1].Value;
