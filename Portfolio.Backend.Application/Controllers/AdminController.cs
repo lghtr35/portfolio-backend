@@ -76,7 +76,6 @@ namespace Portfolio.Backend.Controllers
                 var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                 var authProperties = new AuthenticationProperties
                 {
-
                     ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(60),
                 };
 
@@ -97,6 +96,7 @@ namespace Portfolio.Backend.Controllers
         {
             try
             {
+                _logger.LogInformation("Logout Admin has received a request");
                 await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
                 return Ok();
@@ -117,6 +117,7 @@ namespace Portfolio.Backend.Controllers
             {
                 return Ok(await Task.Run(() =>
                 {
+                    _logger.LogInformation("IsValid Admin has received a request");
                     return new BaseControllerResponse();
                 }));
             }

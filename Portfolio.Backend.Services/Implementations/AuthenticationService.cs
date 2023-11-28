@@ -5,7 +5,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Portfolio.Backend.Services.Interfaces;
 using Portfolio.Backend.Common.Data.Entities;
-using System.ComponentModel.DataAnnotations;
 
 namespace Portfolio.Backend.Services.Implementations
 {
@@ -32,8 +31,6 @@ namespace Portfolio.Backend.Services.Implementations
 
             var claims = new[] {
                         new Claim(JwtRegisteredClaimNames.Sub, _configuration["Jwt:Subject"]),
-                        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                        new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
                         new Claim("UserID", admin.UserId.ToString()),
                         new Claim("Username", admin.Username),
                     };
@@ -56,10 +53,10 @@ namespace Portfolio.Backend.Services.Implementations
                 ValidateAudience = true,
                 ValidAudience = _configuration["Jwt:Audience"],
                 ValidIssuer = _configuration["Jwt:Issuer"],
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"])),
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("Jwt").GetValue<string>("Key"))),
             };
             SecurityToken outToken;
-            var res = new JwtSecurityTokenHandler().ValidateToken(token, Tvp, out outToken);
+            _ = new JwtSecurityTokenHandler().ValidateToken(token, Tvp, out outToken);
             return true;
         }
     }

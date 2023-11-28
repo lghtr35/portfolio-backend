@@ -1,6 +1,5 @@
-﻿using System;
-using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
+using Npgsql;
 
 namespace Portfolio.Backend.Common.Helpers
 {
@@ -11,24 +10,23 @@ namespace Portfolio.Backend.Common.Helpers
 		public DatabaseHelper(IConfiguration configuration)
 		{
 			_configuration = configuration;
-			_connStr = _configuration.GetConnectionString("SqlServer");
+			_connStr = _configuration.GetConnectionString("PostgreSQL");
 		}
 
 
 		public List<T> RunQuery<T>(string query)
 		{
-            List<T> res = new();
-            using (SqlConnection conn = new(_connStr))
+			List<T> res = new();
+			using (var conn = NpgsqlDataSource.Create(_connStr))
 			{
-				conn.Open();
-				SqlCommand command = new(query, conn);
-				using(SqlDataReader reader = command.ExecuteReader())
+				var command = conn.CreateCommand(query);
+				using (var reader = command.ExecuteReader())
 				{
-					while(reader.Read())
+					while (reader.Read())
 					{
 						Type type = typeof(T);
 						T temp = Activator.CreateInstance<T>();
-						foreach(var prop in type.GetProperties())
+						foreach (var prop in type.GetProperties())
 						{
 							prop.SetValue(temp, Convert.ChangeType(reader[prop.Name], prop.PropertyType));
 						}
@@ -39,18 +37,17 @@ namespace Portfolio.Backend.Common.Helpers
 			return res;
 		}
 
-        public T RunQueryScalar<T>(string query)
-        {
-            T res = Activator.CreateInstance<T>();
-            using (SqlConnection conn = new(_connStr))
-            {
-                conn.Open();
-                SqlCommand command = new(query, conn);
+		public T RunQueryScalar<T>(string query)
+		{
+			T res = Activator.CreateInstance<T>();
+			using (var conn = NpgsqlDataSource.Create(_connStr))
+			{
+				var command = conn.CreateCommand(query);
 				res = (T)command.ExecuteScalar();
-                
-            }
-            return res;
-        }
-    }
+
+			}
+			return res;
+		}
+	}
 }
 

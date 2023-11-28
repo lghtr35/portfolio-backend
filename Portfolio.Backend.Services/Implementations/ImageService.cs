@@ -7,8 +7,6 @@ using Portfolio.Backend.Common.Data.Entities;
 using Portfolio.Backend.Common.Exceptions;
 using Portfolio.Backend.Common.Helpers;
 using Portfolio.Backend.Common.Data.Repository;
-using System.Net.Http.Json;
-using Microsoft.IdentityModel.Tokens;
 using Portfolio.Backend.Common.Data.Responses.Common;
 using Portfolio.Backend.Common.Data.Requests.Image;
 

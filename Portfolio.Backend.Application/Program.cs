@@ -11,18 +11,23 @@ using Microsoft.AspNetCore.Authorization;
 using Portfolio.Backend.Middleware.Requirements;
 using Portfolio.Backend.Middleware.Handlers;
 using Portfolio.Backend;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Configuration.AddConfiguration(new ConfigurationBuilder()
+    .AddJsonFile("appsettings.json")
+    .Build());
 
 builder.Services.Configure<FormOptions>(o => o.MultipartBodyLengthLimit = 1024 * 1024 * 1024);
 
-builder.Services.AddCors(o => o.AddPolicy(name: "DebugAppPolicy", policy => { policy.WithOrigins("http://localhost:3000", "http://127.0.0.1:3000").AllowAnyHeader().AllowAnyMethod().AllowCredentials(); }));
+builder.Services.AddCors(o => o.AddPolicy(name: "DebugAppPolicy", policy => { policy.WithOrigins(builder.Configuration.GetValue<string>("AllowedOrigin") ?? "", "http://localhost:3000", "http://127.0.0.1:3000").AllowAnyHeader().AllowAnyMethod().AllowCredentials(); }));
 
 builder.Services.AddControllers().AddJsonOptions(options => options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve);
 
 builder.Services.AddDbContext<AppDatabaseContext>(options =>
 {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServer"), b => b.MigrationsAssembly("Portfolio.Backend.Application"));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("PostgreSQL"), b => b.MigrationsAssembly("Portfolio.Backend.Application"));
 });
 
 builder.Services.AddSingleton<IMailService, MailService>();
@@ -58,6 +63,9 @@ builder.Services.AddAuthorization(options =>
 
 var app = builder.Build();
 
+IdentityModelEventSource.ShowPII = true;
+IdentityModelEventSource.LogCompleteSecurityArtifact = true;
+
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
@@ -65,7 +73,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "backend v1"));
 }
 app.UseCors("DebugAppPolicy");
-//app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 
 app.UseRouting();
 app.UseAuthentication();

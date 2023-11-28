@@ -22,7 +22,8 @@ public class JwtCookieRequirementHandler : IAuthorizationHandler
                 bool isValid = false;
                 try
                 {
-                    isValid = _authenticationService.ValidateToken(context.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value ?? "Not Found");
+                    var token = context.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value ?? "Not Found";
+                    isValid = _authenticationService.ValidateToken(token);
                 }
                 catch (Exception err)
                 {
