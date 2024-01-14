@@ -64,14 +64,6 @@ builder.Services.AddAuthorization(options =>
 
 var app = builder.Build();
 
-using (var scp = app.Services.CreateScope())
-{
-    var sv = scp.ServiceProvider;
-
-    var ctx = sv.GetRequiredService<AppDatabaseContext>();
-    ctx.Database.Migrate();
-}
-
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();

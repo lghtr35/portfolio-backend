@@ -6,7 +6,10 @@ namespace Portfolio.Backend.Common.Data.Repository
     public class AppDatabaseContext : DbContext
     {
         public AppDatabaseContext(DbContextOptions<AppDatabaseContext> options)
-            : base(options) { }
+            : base(options)
+        {
+            Database.EnsureCreated();
+        }
         public DbSet<Image> Images { get; set; }
         public DbSet<Project> Projects { get; set; }
         public DbSet<Admin> Admins { get; set; }
