@@ -13,6 +13,7 @@ using Portfolio.Backend.Middleware.Handlers;
 using Portfolio.Backend;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.OpenApi.Writers;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddConfiguration(new ConfigurationBuilder()
@@ -62,6 +63,14 @@ builder.Services.AddAuthorization(options =>
 });
 
 var app = builder.Build();
+
+using (var scp = app.Services.CreateScope())
+{
+    var sv = scp.ServiceProvider;
+
+    var ctx = sv.GetRequiredService<AppDatabaseContext>();
+    ctx.Database.Migrate();
+}
 
 if (app.Environment.IsDevelopment())
 {
