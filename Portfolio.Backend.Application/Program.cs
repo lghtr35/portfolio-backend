@@ -21,7 +21,7 @@ builder.Configuration.AddConfiguration(new ConfigurationBuilder()
 
 builder.Services.Configure<FormOptions>(o => o.MultipartBodyLengthLimit = 1024 * 1024 * 1024);
 
-builder.Services.AddCors(o => o.AddPolicy(name: "DebugAppPolicy", policy => { policy.WithOrigins(builder.Configuration.GetValue<string>("AllowedOrigin") ?? "", "http://localhost:3000", "http://127.0.0.1:3000").AllowAnyHeader().AllowAnyMethod().AllowCredentials(); }));
+builder.Services.AddCors(o => o.AddPolicy(name: "LoopPolicy", policy => { policy.WithOrigins("http://nginx:80", "https://nginx:443", "http://localhost", "https://localhost").AllowAnyHeader().AllowAnyMethod().AllowCredentials(); }));
 
 builder.Services.AddControllers().AddJsonOptions(options => options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve);
 
@@ -63,16 +63,13 @@ builder.Services.AddAuthorization(options =>
 
 var app = builder.Build();
 
-IdentityModelEventSource.ShowPII = true;
-IdentityModelEventSource.LogCompleteSecurityArtifact = true;
-
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
     app.UseSwagger();
     app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "backend v1"));
 }
-app.UseCors("DebugAppPolicy");
+app.UseCors("LoopPolicy");
 // app.UseHttpsRedirection();
 
 app.UseRouting();

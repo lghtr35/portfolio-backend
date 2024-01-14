@@ -34,6 +34,7 @@ namespace Portfolio.Backend.Services.Implementations
 
         public async Task<ProjectResponse> CreateProject(ProjectCreateRequest projectDTO)
         {
+            Console.WriteLine("Img Count: {0}", projectDTO.ProjectImages?.Count() ?? 0);
             Project project = new Project();
             project.Header = projectDTO.Header;
             project.Message = projectDTO.Message;
@@ -44,15 +45,18 @@ namespace Portfolio.Backend.Services.Implementations
             {
                 throw new FileExtensionNotAcceptedException($"{projectDTO.ProjectFile.FileName} has an extension that is not accepted by this service");
             }
-            project.PayloadPath = FileHelper.CreateFile(_saveDirectory, projectDTO.ProjectFile);
+            project.PayloadPath = FileHelper.CreateFileAndFolder(_saveDirectory, projectDTO.ProjectFile);
             if (!projectDTO.ProjectImages.IsNullOrEmpty())
             {
                 foreach (IFormFile imgFile in projectDTO.ProjectImages)
                 {
-                    ImageCreateRequest req = new();
-                    req.ImageName = string.Format("{0}_{1}", projectDTO.Header, imgFile.FileName);
-                    req.ImageFile = imgFile;
+                    ImageCreateRequest req = new()
+                    {
+                        ImageName = string.Format("{0}_{1}", projectDTO.Header, imgFile.FileName),
+                        ImageFile = imgFile
+                    };
                     Image img = await _imageService.CreateImage(req, project);
+                    Console.WriteLine("Image {0} => Path {1}", img.ImageName, img.PayloadPath);
                     imgs.Add(img);
                 }
             }

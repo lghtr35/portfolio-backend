@@ -101,7 +101,7 @@ namespace Portfolio.Backend.Services.Implementations
             Image? res = await _context.Images.Where(prop => prop.ImageName == name).FirstOrDefaultAsync();
             if (res == null)
             {
-                throw new ObjectNotFoundException("No project with the given id have been found");
+                throw new ObjectNotFoundException("No image with the given id have been found");
             }
             return res;
         }

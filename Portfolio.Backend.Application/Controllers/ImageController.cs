@@ -3,9 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Portfolio.Backend.Common.Data.Requests.Image;
 using Portfolio.Backend.Common.Data.Responses.Common;
 using Portfolio.Backend.Common.Data.Responses.Image;
+using Portfolio.Backend.Common.Exceptions;
 using Portfolio.Backend.Services.Interfaces;
-
-// For more information on enabling Web API for empty Images, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace Portfolio.Backend.Controllers
 {
@@ -48,6 +47,12 @@ namespace Portfolio.Backend.Controllers
                 var res = new ImageResponse(image);
                 return Ok(res);
             }
+            catch (ObjectNotFoundException err)
+            {
+                var resp = new ImageResponse(err, "Name did not match any image");
+                return StatusCode(StatusCodes.Status400BadRequest, resp);
+
+            }
             catch (Exception err)
             {
                 _logger.LogError("An error occured in ImageController due to: " + err.Message, err);
@@ -63,7 +68,6 @@ namespace Portfolio.Backend.Controllers
             {
                 _logger.LogInformation("Read All Images recieved a request");
                 var res = await _imageService.GetImages(dto);
-                if (res.ItemsInPage == 0) throw new BadHttpRequestException("Filter returns no results");
                 return Ok(res);
             }
             catch (Exception err)
