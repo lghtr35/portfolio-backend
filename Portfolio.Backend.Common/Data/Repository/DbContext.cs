@@ -8,7 +8,11 @@ namespace Portfolio.Backend.Common.Data.Repository
         public AppDatabaseContext(DbContextOptions<AppDatabaseContext> options)
             : base(options)
         {
-            Database.Migrate();
+            var pending = Database.GetPendingMigrations();
+            if (pending != null || pending?.Count() > 0)
+            {
+                Database.Migrate();
+            }
         }
         public DbSet<Image> Images { get; set; }
         public DbSet<Project> Projects { get; set; }
