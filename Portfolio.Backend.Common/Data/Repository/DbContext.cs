@@ -8,7 +8,7 @@ namespace Portfolio.Backend.Common.Data.Repository
         public AppDatabaseContext(DbContextOptions<AppDatabaseContext> options)
             : base(options)
         {
-            Database.EnsureCreated();
+            Database.Migrate();
         }
         public DbSet<Image> Images { get; set; }
         public DbSet<Project> Projects { get; set; }
