@@ -17,8 +17,8 @@ namespace Portfolio.Backend.Services.Implementations
 
         public async Task<Mail> SendMail(Mail mail)
         {
-            var fromAdress = new MailAddress(configuration.GetSection("EmailConfig")["address"] ?? "", "Serdil Cakmak");
-            var toAddress = new MailAddress(configuration.GetSection("EmailConfig")["destination"] ?? "", "Serdıl Çakmak");
+            var fromAdress = new MailAddress(configuration.GetSection("EmailConfig").GetValue<string>("address") ?? "", "Serdil Cakmak");
+            var toAddress = new MailAddress(configuration.GetSection("EmailConfig").GetValue<string>("destination") ?? "", "Serdıl Çakmak");
             MailMessage msg = new(fromAdress, toAddress)
             {
                 Subject = mail.Subject,
