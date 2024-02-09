@@ -6,6 +6,7 @@ using Portfolio.Backend.Common.Data.Responses.Common;
 using Portfolio.Backend.Common.Data.Responses.Project;
 using Portfolio.Backend.Services.Interfaces;
 
+// TODO: Better error handling and logging
 namespace Portfolio.Backend.Controllers
 {
     [ApiController]

@@ -2,6 +2,7 @@
 using Portfolio.Backend.Common.Data.Entities;
 using Portfolio.Backend.Services.Interfaces;
 
+// TODO: Better error handling and logging
 namespace Portfolio.Backend.Controllers
 {
 
@@ -23,7 +24,7 @@ namespace Portfolio.Backend.Controllers
         {
             try
             {
-                _logger.LogInformation("Create Admin recieved a request");
+                _logger.LogInformation("Send Mail recieved a request");
                 return Ok(await _mailService.SendMail(mail));
             }
             catch (Exception err)

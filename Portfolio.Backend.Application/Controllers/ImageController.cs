@@ -6,6 +6,7 @@ using Portfolio.Backend.Common.Data.Responses.Image;
 using Portfolio.Backend.Common.Exceptions;
 using Portfolio.Backend.Services.Interfaces;
 
+// TODO: Better error handling and logging
 namespace Portfolio.Backend.Controllers
 {
     [Route("api/v1/[controller]")]
