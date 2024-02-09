@@ -17,18 +17,20 @@ namespace Portfolio.Backend.Services.Implementations
 
         public async Task<Mail> SendMail(Mail mail)
         {
-            MailMessage msg = new("noreply@serdilcakmak.com", mail.Destination)
+            var fromAdress = new MailAddress(configuration.GetSection("EmailConfig")["address"] ?? "", "Serdil Cakmak");
+            var toAddress = new MailAddress(configuration.GetSection("EmailConfig")["destination"] ?? "", "Serdıl Çakmak");
+            MailMessage msg = new(fromAdress, toAddress)
             {
                 Subject = mail.Subject,
-                Body = "<h1>Sent by: " + mail.Sender + "</h1><br/>" + "<pre>" + mail.Message + "</pre>",
+                Body = "<pre>" + mail.Message + "</pre>" + "<br/>" + "<h2>Sent by: " + mail.Sender + "</h2>",
                 IsBodyHtml = true
             };
-            var auth = configuration.GetSection("EmailConfig").GetChildren().ToList();
-            var id = auth[0].Value;
-            var password = auth[1].Value;
-            var client = new SmtpClient("smtp.mailtrap.io", 2525)
+            var auth = configuration.GetSection("EmailConfig");
+            var client = new SmtpClient(auth["server"], auth.GetValue<int>("port"))
             {
-                Credentials = new NetworkCredential(id, password),
+                DeliveryMethod = SmtpDeliveryMethod.Network,
+                UseDefaultCredentials = false,
+                Credentials = new NetworkCredential(auth["id"], auth["password"]),
                 EnableSsl = true
             };
             await client.SendMailAsync(msg);

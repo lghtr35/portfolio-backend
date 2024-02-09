@@ -414,3 +414,4 @@ ASALocalRun/
 # Application settings
 appsettings*.json
 Portfolio.Backend.Application/Migrations/*.cs
+*.code-workspace
